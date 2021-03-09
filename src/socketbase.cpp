@@ -1,17 +1,17 @@
-// see:https://www.cnblogs.com/curo0119/p/8455464.html
+﻿// see:https://www.cnblogs.com/curo0119/p/8455464.html
 #include "socketbase.h"
 #include <stdio.h>
 
 
 #ifdef _WIN32
 	#pragma comment(lib, "ws2_32.lib")
-	#define COMMON_CLOSE_SOCKET closesocket
-	#define COMMON_CLEANUP WSACleanup();
-            auto stat = WSAGetLastError();
-	#define COMMON_INVALID_SOCKET INVALID_SOCKET
+
+	#define COMMON_CLOSE_SOCKET(x) closesocket(x)
+	#define COMMON_SOCKLEN_T int
 	#define COMMON_SOCKADDR SOCKADDR
+	#define COMMON_CLEANUP WSACleanup();
 	#define COMMON_INVALID_SOCKET INVALID_SOCKET
-	#define CMMON_SOCKLEN_T int
+	#define COMMON_SOCKET_ERROR SOCKET_ERROR
 #else
 	#include <unistd.h>
 	#include <stdlib.h>
@@ -35,19 +35,19 @@ int SocketBase::init(const char* ipaddr, int port)
 
 	// initialize socket library
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
-		std::cout << "WSAStartup failed.\n";
+		printf("WSAStartup failed.\n");
 		COMMON_CLEANUP;
 		return -1;
 	}
-	std::cout << "WSAStartup success.\n";
+	printf("WSAStartup success.\n");
 
 	// check if have a new version
 	if (LOBYTE(wsadata.wVersion) != 2 || HIBYTE(wsadata.wHighVersion) != 2) {
-		std::cout << "WSAData version doesn't match.\n";
+		printf("WSAData version doesn't match.\n");
 		COMMON_CLEANUP;
 		return -2;
 	}
-	std::cout << "WSAData version match success.\n";
+	printf("WSAData version match success.\n");
 #endif
 
 	// fill server info
@@ -76,7 +76,7 @@ int TCPSocketServerBase::init(const char* ipaddr, int port)
 	// create socket
 	socket_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_ == COMMON_INVALID_SOCKET) {
-		printf("socket() failed ,Error Code:%d/n", COMMON_INVALID_SOCKET);
+		printf("socket() failed ,Error Code:%d/n", (int)COMMON_INVALID_SOCKET);
 		COMMON_CLEANUP;
 		return -3;
 	}
@@ -137,7 +137,7 @@ int TCPSocketClientBase::init(const char* ipaddr, int port)
 
 	socket_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_ == COMMON_INVALID_SOCKET) {
-		printf("socket() failed, Error Code:%d\n", COMMON_INVALID_SOCKET);
+		printf("socket() failed, Error Code:%d\n", (int)COMMON_INVALID_SOCKET);
 		COMMON_CLEANUP;
 		return -3;
 	}
@@ -162,6 +162,7 @@ int TCPSocketClientBase::release()
 	SocketBase::release();
 	free(precv_buf_);
 	precv_buf_ = nullptr;
+	return (bool)precv_buf_;
 }
 
 int TCPSocketClientBase::sendData(void* _byte, size_t _len)
@@ -214,7 +215,7 @@ int UDPSocketClientBase::init(const char* ipaddr, int port)
 	SocketBase::init(ipaddr, port);
 	socket_ = socket(AF_INET, SOCK_DGRAM, 0);
 	if (socket_ == COMMON_INVALID_SOCKET) {
-		printf("socket() failed, Error Code:%d/n", COMMON_INVALID_SOCKET);
+		printf("socket() failed, Error Code:%d/n", (int)COMMON_INVALID_SOCKET);
 		COMMON_CLEANUP;
 		return -1;
 	}
@@ -224,7 +225,7 @@ int UDPSocketClientBase::init(const char* ipaddr, int port)
 int UDPSocketClientBase::sendData(void* _byte, size_t _len)
 {
 	if (sendto(socket_, (char*)_byte, (int)_len, 0, (sockaddr*)&server_addr_, sizeof(server_addr_)) == COMMON_SOCKET_ERROR) {
-		printf("recvfrom() failed:%d/n", COMMON_INVALID_SOCKET);
+		printf("recvfrom() failed:%d/n", (int)COMMON_INVALID_SOCKET);
 		return -1;
 	}
 	return 0;

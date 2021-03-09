@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // #define _WIN32
 #ifdef _WIN32
@@ -6,6 +6,7 @@
 
 	#define STRUCT
 	#define NULL_VALUE NULL
+	#define WSAGETLASTERROR WSAGetLastError()
 #else
 	#include <string.h>
 	#include <netinet/in.h>
