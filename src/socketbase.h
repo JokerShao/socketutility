@@ -1,20 +1,27 @@
 #pragma once
 
 // #define _WIN32
-
 #ifdef _WIN32
 	#include <winsock.h>
+
+	#define STRUCT
+	#define NULL_VALUE NULL
 #else
+	#include <string.h>
+	#include <netinet/in.h>
 
+	#define SOCKET int
+	#define STRUCT struct
+	#define SOCKADDR_IN sockaddr_in
+	#define NULL_VALUE 0
+	#define WSAGETLASTERROR 0
 #endif
-
-#define      BUF_SIZE     1024
 
 
 class SocketBase
 {
 public:
-	SocketBase() : precv_buf_(nullptr), socket_(NULL) {
+	SocketBase() : socket_(NULL_VALUE) {
 		memset(&server_addr_, 0, sizeof(server_addr_));
 		memset(&client_addr_, 0, sizeof(client_addr_));
 	}
@@ -22,30 +29,28 @@ public:
 
 	virtual int init(const char* ipaddr, int port);
 
-	virtual int close();
+	virtual int release();
 
 protected:
 
-	char* precv_buf_;
-
 	SOCKET socket_;
 
-	SOCKADDR_IN server_addr_;
-	SOCKADDR_IN client_addr_;
+	STRUCT SOCKADDR_IN server_addr_;
+	STRUCT SOCKADDR_IN client_addr_;
 };
 
 class TCPSocketServerBase : public SocketBase
 {
 public:
-	TCPSocketServerBase() :s_client_(NULL) {}
+	TCPSocketServerBase() : s_client_(NULL_VALUE) {}
 
 	virtual ~TCPSocketServerBase() {}
 
 	virtual int init(const char* ipaddr, int port) override;
 
-	virtual int recvData(void* _byte, size_t _len);
+	virtual int release() override;
 
-	virtual int close() override;
+	virtual int recvData(void* _byte, size_t _len);
 
 private:
 
@@ -55,13 +60,22 @@ private:
 class TCPSocketClientBase : public SocketBase
 {
 public:
-	TCPSocketClientBase() {}
+	TCPSocketClientBase() : precv_buf_(nullptr), buf_size_(1024) {}
 
 	virtual ~TCPSocketClientBase() {}
 
 	virtual int init(const char* ipaddr, int port) override;
 
+	virtual int init(const char* ipaddr, int port, int buf_size/*=1024*/);
+
+	virtual int release() override;
+
 	virtual int sendData(void* _byte, size_t _len);
+
+private:
+
+	char* precv_buf_;
+	int buf_size_;
 };
 
 class UDPSocketServerBase : public SocketBase
@@ -76,7 +90,7 @@ public:
 	virtual int recvData(void* _byte, int _len);
 };
 
-class UDPSocketClientBase :public SocketBase
+class UDPSocketClientBase : public SocketBase
 {
 public:
 	UDPSocketClientBase() {}

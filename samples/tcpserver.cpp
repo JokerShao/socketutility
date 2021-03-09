@@ -1,5 +1,5 @@
-#include <iostream>
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "socketbase.h"
 
 
@@ -7,7 +7,7 @@ int main()
 {
     TCPSocketServerBase server;
     server.init("127.0.0.1", 6743);
-    char* recvbuf = new char[100];
+    char* recvbuf = (char*)malloc(100);
 
     while (1)
     {
@@ -17,12 +17,13 @@ int main()
         }
         if (strcmp(recvbuf, "20") == 0)
             break;
-        std::cout << "Server receive##   " << recvbuf << "   ##\n";
+        printf("Server receive##   %s   ##\n", recvbuf);
     }
 
-    delete[] recvbuf;
-    server.close();
-    system("pause");
+    free(recvbuf);
+    recvbuf = nullptr;
+    server.release();
+    getchar();
     return 0;
 }
 

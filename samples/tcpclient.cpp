@@ -1,6 +1,5 @@
-#include <iostream>
+#include <stdio.h>
 #include <string>
-
 #include "socketbase.h"
 
 
@@ -10,7 +9,7 @@ int main()
     client.init("127.0.0.1", 6743);
 
     int cnt = 0;
-    char* pbuffer = new char[100];
+    char* pbuffer = (char*)malloc(100);
 
     while (1)
     {
@@ -18,15 +17,15 @@ int main()
         memcpy(pbuffer, std::to_string(cnt).c_str(), std::to_string(cnt).size());
         if (client.sendData((void*)pbuffer, 100) != 0)
             break;
-
         if (cnt++ >= 20)
             break;
-        system("pause");
+        getchar();
     }
 
-    delete[] pbuffer;
-    client.close();
-    system("pause");
+    free(pbuffer);
+    pbuffer = nullptr;
+    client.release();
+    getchar();
     return 0;
 }
 
