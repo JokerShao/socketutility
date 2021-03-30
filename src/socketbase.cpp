@@ -27,7 +27,6 @@
 	#define COMMON_SOCKET_ERROR -1
 #endif
 
-
 int SocketBase::init(const char* ipaddr, int port)
 {
 #ifdef _WIN32
@@ -58,6 +57,7 @@ int SocketBase::init(const char* ipaddr, int port)
 	server_addr_.sin_addr.s_addr = inet_addr(ipaddr);
 #endif
 	server_addr_.sin_port = htons(port);
+
 	return 0;
 }
 
@@ -76,7 +76,7 @@ int TCPSocketServerBase::init(const char* ipaddr, int port)
 	// create socket
 	socket_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_ == COMMON_INVALID_SOCKET) {
-		printf("socket() failed ,Error Code:%d/n", (int)COMMON_INVALID_SOCKET);
+		printf("socket() failed ,Error Code:%d\n", (int)COMMON_INVALID_SOCKET);
 		COMMON_CLEANUP;
 		return -3;
 	}
@@ -123,7 +123,7 @@ int TCPSocketServerBase::recvData(void* _byte, size_t _len)
 		printf("receive failed!\n");
 		return -1;
 	}
-	if (send(s_client_, "received.\n", sizeof("received.\n"), 0) < 0) {
+	if (send(s_client_, "received.", sizeof("received."), 0) < 0) {
 		printf("send failed!\n");
 		return -2;
 	}
@@ -168,7 +168,6 @@ int TCPSocketClientBase::release()
 int TCPSocketClientBase::sendData(void* _byte, size_t _len)
 {
 	memset(precv_buf_, 0, buf_size_);
-	// send(套接字, 地址, 实际发送的字节数, 0)
 	if (send(socket_, (char*)_byte, (int)_len, 0) < 0) {
 		printf("send failed!\n");
 		return -1;
@@ -177,7 +176,7 @@ int TCPSocketClientBase::sendData(void* _byte, size_t _len)
 		printf("receive failed!\n");
 		return -2;
 	}
-	printf("receive server message: %s\n", precv_buf_);
+	printf("receive server reply: %s\n", precv_buf_);
 	return 0;
 }
 
@@ -204,9 +203,9 @@ int UDPSocketServerBase::recvData(void* _byte, int _len)
 	}
 	if (sendto(socket_, "received.\n", sizeof("received.\n"),
 		0, (COMMON_SOCKADDR*)&client_addr_, _len) < 0) {
-			printf("send failed!\n");
-			return -2;
-		}
+		printf("send failed!\n");
+		return -2;
+	}
 	return 0;
 }
 

@@ -11,7 +11,7 @@ int main()
 
     while (1)
     {
-        memset(recvbuf, 0, sizeof(recvbuf));
+        memset(recvbuf, 0, 100);
         if (server.recvData(recvbuf, 100) != 0) { // 接收状态不正确
             auto stat = WSAGETLASTERROR;
             printf("stat: %d\n", stat);

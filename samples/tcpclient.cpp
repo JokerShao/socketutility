@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <string>
+#include <thread>
 #include "socketbase.h"
 
 
@@ -19,7 +19,7 @@ int main()
             break;
         if (cnt++ >= 20)
             break;
-        getchar();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     free(pbuffer);

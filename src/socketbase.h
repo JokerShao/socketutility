@@ -8,14 +8,15 @@
 	#define NULL_VALUE NULL
 	#define WSAGETLASTERROR WSAGetLastError()
 #else
-	#include <string.h>
+	#include <cstring>
+	#include <errno.h>
 	#include <netinet/in.h>
 
 	#define SOCKET int
-	#define STRUCT struct
 	#define SOCKADDR_IN sockaddr_in
+	#define STRUCT struct
 	#define NULL_VALUE 0
-	#define WSAGETLASTERROR 0
+	#define WSAGETLASTERROR errno
 #endif
 
 
@@ -23,8 +24,8 @@ class SocketBase
 {
 public:
 	SocketBase() : socket_(NULL_VALUE) {
-		memset(&server_addr_, 0, sizeof(server_addr_));
-		memset(&client_addr_, 0, sizeof(client_addr_));
+		std::memset(&server_addr_, 0, sizeof(server_addr_));
+		std::memset(&client_addr_, 0, sizeof(client_addr_));
 	}
 	virtual ~SocketBase() {}
 
@@ -67,7 +68,7 @@ public:
 
 	virtual int init(const char* ipaddr, int port) override;
 
-	virtual int init(const char* ipaddr, int port, int buf_size/*=1024*/);
+	virtual int init(const char* ipaddr, int port, int buf_size);
 
 	virtual int release() override;
 
